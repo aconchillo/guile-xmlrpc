@@ -1,6 +1,6 @@
 moddir=$(prefix)/share/guile/site
 
-SOURCES = xmlrpc.scm
+SOURCES = base64.scm simple.scm
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 

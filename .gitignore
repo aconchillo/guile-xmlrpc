@@ -12,3 +12,5 @@
 Makefile
 Makefile.in
 *.go
+
+guile-xmlrpc*.tar.gz

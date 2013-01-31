@@ -1,6 +1,6 @@
 ;;; (xmlrpc) --- Guile XMLRPC implementation.
 
-;; Copyright (C) 2012 Aleix Conchillo Flaque <aconchillo at gmail dot com>
+;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo at gmail dot com>
 ;;
 ;; This file is part of guile-xmlrpc.
 ;;
@@ -23,32 +23,82 @@
 
 ;;; Commentary:
 
-;; Tekuti generic XMLRPC support.
+;; XMLRPC module for Guile
 
 ;;; Code:
 
-(define-module (xmlrpc)
+(define-module (xmlrpc simple)
+  #:use-module (xmlrpc base64)
   #:use-module (rnrs bytevectors)
   #:use-module (sxml simple)
   #:use-module (sxml xpath)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-19)
-  #:export (sxmlrpc-request-method
+  #:export (sxmlrpc
+            sxmlrpc->scm
+
+            sxmlrpc-request-method
             sxmlrpc-request-params
 
-            sxmlrpc-struct sxmlrpc-array
-            sxmlrpc-string sxmlrpc-integer
-            sxmlrpc-boolean sxmlrpc-date
-            sxmlrpc-fault
-
             xml->sxmlrpc-request
-            sxml->sxmlrpc-request
+            sxml->sxmlrpc-request))
 
-            sxmlrpc-fault->xml
-            sxmlrpc-response->xml))
+(define (scm->sxmlrpc scm)
+  (cond
+   ((boolean? scm) `(boolean ,(if scm 1 0)))
+   ((integer? scm) `(int ,scm))
+   ((real? scm) `(double ,scm))
+   ((string? scm) `(string ,scm))
+   ((date? scm) `(dateTime.iso8601
+                  ,(date->string scm "~Y~m~dT~H:~M:~S")))
+   (else (throw 'xmlrpc-invalid))))
 
-(define (sxml->sxmlrpc-request x)
+(define-syntax sxmlrpc
+  (lambda (x)
+    (syntax-case x (unquote array struct)
+      ((_ val)
+       (self-evaluating? (syntax->datum #'val))
+       #'(sxmlrpc ,'val))
+
+      ((_ (unquote val))
+       #'(scm->sxmlrpc val))
+
+      ((_ (base64 val))
+       (string? (syntax->datum #'val))
+       #'`(base64 ,(base64-encode (string->utf8 val))))
+
+      ((_ (array val ...))
+       #'`(array (data (value ,(sxmlrpc val)) ...)))
+
+      ((_ (struct (k v) ...))
+       #'`(struct (member (name k) (value ,(sxmlrpc v))) ...))
+
+      ((_ (request name))
+       #'`(methodCall (methodName name)))
+
+      ((_ (request* name (p ...)))
+       #'`(methodCall (methodName name)
+                      (params (param (value ,(sxmlrpc p))) ...)))
+
+      ((_ (response val))
+       #'`(methodResponse (params (param ,(sxmlrpc val)))))
+
+      ((_ (response-fault c m))
+       (and (integer? (syntax->datum #'c))
+            (string? (syntax->datum #'m)))
+       #'`(methodResponse
+           (fault (value ,(sxmlrpc (struct ("faultCode" c)
+                                           ("faultString" m))))))))))
+
+
+(define (sxmlrpc-request-method request)
+  (assq-ref request 'method))
+
+(define (sxmlrpc-request-params request)
+  (assq-ref request 'params))
+
+(define (sxmlrpc->scm x)
   (define (native-type t)
     (let-values (((type value) (car+cdr t)))
       (case type
@@ -82,45 +132,7 @@
                (lambda (v) (native-type (second v)))
                ((sxpath '(// params param value)) x)))))
 
-(define (sxmlrpc-request-method request)
-  (assq-ref request 'method))
-
-(define (sxmlrpc-request-params request)
-  (assq-ref request 'params))
-
-(define (sxmlrpc-struct members)
-  `(struct ,(map (lambda (m) `(member (name ,(first m))
-                                      (value ,(cdr m)))) members)))
-
-(define (sxmlrpc-array data)
-  `(array (data ,(map (lambda (v) `(value ,v)) data))))
-
-(define (sxmlrpc-string s)
-  `(string ,s))
-
-(define (sxmlrpc-base64 s)
-  `(base64 ,s))
-
-(define (sxmlrpc-integer v)
-  `(int ,v))
-
-(define (sxmlrpc-boolean b)
-  `(boolean ,(if b 1 0)))
-
-(define (sxmlrpc-date d)
-  `(dateTime.iso8601 ,(date->string d "~Y~m~dT~H:~M:~S")))
-
-(define (sxmlrpc-fault code message)
-  `(fault (value ,(sxmlrpc-struct `((faultCode . ,code)
-                                    (faultString . ,message))))))
-
-(define (sxmlrpc-fault->xml fault port)
-  (sxml->xml `(methodResponse ,fault) port))
-
-(define (sxmlrpc-response->xml param port)
-  (sxml->xml `(methodResponse (params (param (value ,param)))) port))
-
-(define (xml->sxmlrpc-request s)
+(define (xmlrpc->scm str)
   (define (remove-whitespace-nodes sxml)
     (define (node-fix node)
       (cond ((symbol? node) node)
@@ -129,8 +141,7 @@
                                 node))
             (else (remove-whitespace-nodes node))))
     (delete #nil (map node-fix sxml)))
-  (let* ((xml (utf8->string s))
-         (sxml (with-input-from-string xml xml->sxml)))
-    (sxml->sxmlrpc-request (remove-whitespace-nodes sxml))))
+  (let ((sxml (with-input-from-string str xml->sxml)))
+    (sxmlrpc->scm (remove-whitespace-nodes sxml))))
 
 ;;; (xmlrpc) ends here

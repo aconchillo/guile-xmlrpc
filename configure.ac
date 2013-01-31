@@ -1,6 +1,6 @@
 # configure.ac
 #
-# Copyright (C) 2012 Aleix Conchillo Flaque <aconchillo@gmail.com>
+# Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo@gmail.com>
 #
 # This file is part of guile-xmlrpc.
 #
@@ -20,7 +20,7 @@
 # Fifth Floor, Boston, MA  02110-1301  USA
 
 AC_INIT([guile-xmlrpc], [0.1.0], [aconchillo@gmail.com])
-AC_CONFIG_SRCDIR(src/xmlrpc.scm)
+AC_CONFIG_SRCDIR(xmlrpc.scm)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([color-tests -Wall -Wno-portability])
 AM_SILENT_RULES([yes])
@@ -41,7 +41,7 @@ GUILE_MODULE_REQUIRED([srfi srfi-1])
 GUILE_MODULE_REQUIRED([srfi srfi-11])
 GUILE_MODULE_REQUIRED([srfi srfi-19])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile xmlrpc/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 
 AC_OUTPUT
