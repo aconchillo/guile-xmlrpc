@@ -28,7 +28,8 @@
 ;;; Code:
 
 (define-module (xmlrpc)
-  #:use-module (xmlrpc simple))
+  #:use-module (xmlrpc simple)
+  #:use-module (xmlrpc syntax))
 
 (define-syntax re-export-modules
   (syntax-rules ()
@@ -38,6 +39,7 @@
                     (resolve-interface '(mod ...)))
        ...))))
 
-(re-export-modules (xmlrpc simple))
+(re-export-modules (xmlrpc simple)
+                   (xmlrpc syntax))
 
 ;;; (xmlrpc) ends here
