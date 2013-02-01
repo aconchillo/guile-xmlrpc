@@ -34,6 +34,7 @@ else
    AC_MSG_ERROR([Guile 2.0 required.])
 fi
 
+GUILE_MODULE_REQUIRED([rnrs bytevectors])
 GUILE_MODULE_REQUIRED([sxml simple])
 GUILE_MODULE_REQUIRED([sxml xpath])
 GUILE_MODULE_REQUIRED([srfi srfi-1])

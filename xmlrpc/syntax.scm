@@ -29,6 +29,7 @@
 
 (define-module (xmlrpc syntax)
   #:use-module (xmlrpc base64)
+  #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-19)
   #:export (sxmlrpc))
 

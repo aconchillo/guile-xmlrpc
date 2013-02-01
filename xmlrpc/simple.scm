@@ -29,58 +29,52 @@
 
 (define-module (xmlrpc simple)
   #:use-module (xmlrpc base64)
+  #:use-module (rnrs bytevectors)
   #:use-module (sxml simple)
   #:use-module (sxml xpath)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-19)
-  #:export (sxmlrpc->scm
+  #:export (xmlrpc->scm
+            sxmlrpc->scm))
 
-            sxmlrpc-request-method
-            sxmlrpc-request-params
+;; (define (sxmlrpc-request-method request)
+;;   (assq-ref request 'method))
 
-            xml->sxmlrpc-request
-            sxml->sxmlrpc-request))
+;; (define (sxmlrpc-request-params request)
+;;   (assq-ref request 'params))
 
-(define (sxmlrpc-request-method request)
-  (assq-ref request 'method))
+;; (define (sxmlrpc->scm x)
+;;   (list (cons 'method
+;;               (string->symbol (cadar ((sxpath '(methodCall methodName)) x))))
+;;         (cons 'params
+;;               (map
+;;                (lambda (v) (native-type (second v)))
+;;                ((sxpath '(// params param value)) x)))))
 
-(define (sxmlrpc-request-params request)
-  (assq-ref request 'params))
-
-(define (sxmlrpc->scm x)
-  (define (native-type t)
-    (let-values (((type value) (car+cdr t)))
-      (case type
-        ((i4) (if (null? value) 0 (string->number (car value))))
-        ((int) (if (null? value) 0 (string->number (car value))))
-        ((double) (if (null? value) 0.0 (string->number (car value))))
-        ((string) (if (null? value) "" (car value)))
-        ((base64) (if (null? value) "" (car value)))
-        ((boolean) (if (null? value)
-                       #f
-                       (not (zero? (string->number (car value))))))
-        ((dateTime.iso8601) (if (null? value)
-                                (current-date)
-                                (string->date (car value)
-                                              "~Y~m~dT~H:~M:~S")))
-        ((struct)
-         (map
-          (lambda (n v) (cons (string->symbol (second n))
-                              (native-type (second v))))
-          ((sxpath '(name)) value)
-          ((sxpath '(value)) value)))
-        ((array)
-         (list->vector
-          (map
-           (lambda (v) (native-type (second v)))
-           ((sxpath '(value)) value)))))))
-  (list (cons 'method
-              (string->symbol (cadar ((sxpath '(methodCall methodName)) x))))
-        (cons 'params
-              (map
-               (lambda (v) (native-type (second v)))
-               ((sxpath '(// params param value)) x)))))
+(define (sxmlrpc->scm sxml)
+  (let-values (((type value) (car+cdr sxml)))
+    (case type
+      ((i4 int double) (if (null? value) 0 (car value)))
+      ((string) (if (null? value) "" (car value)))
+      ((base64) (if (null? value) "" (utf8->string
+                                      (base64-decode (car value)))))
+      ((boolean) (if (null? value) #f (not (zero? (car value)))))
+      ((dateTime.iso8601) (if (null? value)
+                              (current-date)
+                              (string->date (car value)
+                                            "~Y~m~dT~H:~M:~S")))
+      ((struct)
+       (map
+        (lambda (n v) (cons (string->symbol (second n))
+                            (sxmlrpc->scm (second v))))
+        ((sxpath '(name)) value)
+        ((sxpath '(value)) value)))
+      ((array)
+       (list->vector
+        (map
+         (lambda (v) (sxmlrpc->scm (second v)))
+         ((sxpath '(value)) value)))))))
 
 (define (xmlrpc->scm str)
   (define (remove-whitespace-nodes sxml)
