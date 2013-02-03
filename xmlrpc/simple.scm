@@ -38,13 +38,82 @@
   #:export (xmlrpc->scm
             sxmlrpc->scm
             xmlrpc-request-method
-            xmlrpc-request-params))
+            xmlrpc-request-params
+            xmlrpc-response-params
+            xmlrpc-response-fault?
+            xmlrpc-response-fault-code
+            xmlrpc-response-fault-message))
+
+;;
+;; sxmlrpc->scm helpers
+;;
+
+(define (sxmlrpc-array->scm sxml)
+  (map
+   (lambda (v) (sxmlrpc->scm (second v)))
+   ((sxpath '(// data value)) sxml)))
+
+(define (sxmlrpc-struct->scm sxml)
+  (let ((table (make-hash-table)))
+    (map
+     (lambda (n v)
+       (hash-set! table (second n) (sxmlrpc->scm (second v))))
+     ((sxpath '(// member name)) sxml)
+     ((sxpath '(// member value)) sxml))
+    table))
+
+(define (sxmlrpc-request->scm sxml)
+  (let ((method (cadar ((sxpath '(// methodName)) sxml)))
+        (params ((sxpath '(// params param value)) sxml)))
+    (list (cons 'method (string->symbol method))
+          (cons 'params
+                (map (lambda (v) (sxmlrpc->scm (second v)))
+                     params)))))
+
+(define (sxmlrpc-response->scm sxml)
+  (let ((params ((sxpath '(// params param value)) sxml))
+        (fault ((sxpath '(// fault value struct member)) sxml)))
+    (cond
+     ((not (null? params))
+      (list (cons 'params
+                  (map (lambda (v) (sxmlrpc->scm (second v)))
+                       params))))
+     ((not (null? fault))
+      (let ((faultCode (cadar ((sxpath '(name)) (car fault))))
+            (faultString (cadar ((sxpath '(name)) (cdr fault)))))
+        (cond
+         ((and (string=? faultCode "faultCode")
+               (string=? faultString "faultString"))
+          (let ((code (cadar ((sxpath '(value)) (car fault))))
+                (message (cadar ((sxpath '(value)) (cdr fault)))))
+            (list (cons 'fault
+                        (list (cons 'code (sxmlrpc->scm code))
+                              (cons 'message (sxmlrpc->scm message)))))))
+         (else (throw 'xmlrpc-invalid)))))
+     ;; If we don't have params or fault, we hit some error.
+     (else (throw 'xmlrpc-invalid)))))
+
+;;
+;; Public procedures
+;;
 
 (define (xmlrpc-request-method request)
   (assq-ref request 'method))
 
 (define (xmlrpc-request-params request)
   (assq-ref request 'params))
+
+(define (xmlrpc-response-params response)
+  (assq-ref response 'params))
+
+(define (xmlrpc-response-fault? response)
+  (if (assq-ref response 'fault) #t #f))
+
+(define (xmlrpc-response-fault-code response)
+  (assq-ref (assq-ref response 'fault) 'code))
+
+(define (xmlrpc-response-fault-message response)
+  (assq-ref (assq-ref response 'fault) 'message))
 
 (define (sxmlrpc->scm sxml)
   (let-values (((type value) (car+cdr sxml)))
@@ -58,30 +127,11 @@
                               (current-date)
                               (string->date (car value)
                                             "~Y~m~dT~H:~M:~S")))
-      ((array)
-       (map
-        (lambda (v) (sxmlrpc->scm (second v)))
-        ((sxpath '(// data value)) sxml)))
-      ((struct)
-       (let ((table (make-hash-table)))
-         (map
-          (lambda (n v)
-            (hash-set! table (second n) (sxmlrpc->scm (second v))))
-          ((sxpath '(// member name)) sxml)
-          ((sxpath '(// member value)) sxml))
-         table))
-      ((methodCall)
-       (let ((method (cadar ((sxpath '(// methodName)) sxml)))
-             (params ((sxpath '(// params param value)) sxml)))
-         (list (cons 'method (string->symbol method))
-               (cons 'params
-                     (map (lambda (v) (sxmlrpc->scm (second v)))
-                          params)))))
-      ((methodResponse)
-       (let ((params ((sxpath '(// params param value)) sxml)))
-         (list (cons 'params
-                     (map (lambda (v) (sxmlrpc->scm (second v)))
-                          params))))))))
+      ((array) (sxmlrpc-array->scm sxml))
+      ((struct) (sxmlrpc-struct->scm sxml))
+      ((methodCall) (sxmlrpc-request->scm sxml))
+      ((methodResponse) (sxmlrpc-response->scm sxml))
+      (else (throw 'xmlrpc-invalid)))))
 
 (define (xmlrpc->scm str)
   (define (remove-whitespace-nodes sxml)
