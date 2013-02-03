@@ -36,21 +36,15 @@
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-19)
   #:export (xmlrpc->scm
-            sxmlrpc->scm))
+            sxmlrpc->scm
+            xmlrpc-request-method
+            xmlrpc-request-params))
 
-;; (define (sxmlrpc-request-method request)
-;;   (assq-ref request 'method))
+(define (xmlrpc-request-method request)
+  (assq-ref request 'method))
 
-;; (define (sxmlrpc-request-params request)
-;;   (assq-ref request 'params))
-
-;; (define (sxmlrpc->scm x)
-;;   (list (cons 'method
-;;               (string->symbol (cadar ((sxpath '(methodCall methodName)) x))))
-;;         (cons 'params
-;;               (map
-;;                (lambda (v) (native-type (second v)))
-;;                ((sxpath '(// params param value)) x)))))
+(define (xmlrpc-request-params request)
+  (assq-ref request 'params))
 
 (define (sxmlrpc->scm sxml)
   (let-values (((type value) (car+cdr sxml)))
@@ -64,17 +58,30 @@
                               (current-date)
                               (string->date (car value)
                                             "~Y~m~dT~H:~M:~S")))
-      ((struct)
-       (map
-        (lambda (n v) (cons (string->symbol (second n))
-                            (sxmlrpc->scm (second v))))
-        ((sxpath '(name)) value)
-        ((sxpath '(value)) value)))
       ((array)
-       (list->vector
-        (map
-         (lambda (v) (sxmlrpc->scm (second v)))
-         ((sxpath '(value)) value)))))))
+       (map
+        (lambda (v) (sxmlrpc->scm (second v)))
+        ((sxpath '(// data value)) sxml)))
+      ((struct)
+       (let ((table (make-hash-table)))
+         (map
+          (lambda (n v)
+            (hash-set! table (second n) (sxmlrpc->scm (second v))))
+          ((sxpath '(// member name)) sxml)
+          ((sxpath '(// member value)) sxml))
+         table))
+      ((methodCall)
+       (let ((method (cadar ((sxpath '(// methodName)) sxml)))
+             (params ((sxpath '(// params param value)) sxml)))
+         (list (cons 'method (string->symbol method))
+               (cons 'params
+                     (map (lambda (v) (sxmlrpc->scm (second v)))
+                          params)))))
+      ((methodResponse)
+       (let ((params ((sxpath '(// params param value)) sxml)))
+         (list (cons 'params
+                     (map (lambda (v) (sxmlrpc->scm (second v)))
+                          params))))))))
 
 (define (xmlrpc->scm str)
   (define (remove-whitespace-nodes sxml)
