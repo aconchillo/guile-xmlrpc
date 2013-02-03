@@ -36,6 +36,7 @@
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-19)
   #:export (xmlrpc->scm
+            xmlrpc-string->scm
             sxmlrpc->scm
             xmlrpc-request-method
             xmlrpc-request-params
@@ -133,7 +134,7 @@
       ((methodResponse) (sxmlrpc-response->scm sxml))
       (else (throw 'xmlrpc-invalid)))))
 
-(define (xmlrpc->scm str)
+(define (xmlrpc->scm sxml)
   (define (remove-whitespace-nodes sxml)
     (define (node-fix node)
       (cond ((symbol? node) node)
@@ -142,7 +143,9 @@
                                 node))
             (else (remove-whitespace-nodes node))))
     (delete #nil (map node-fix sxml)))
-  (let ((sxml (with-input-from-string str xml->sxml)))
-    (sxmlrpc->scm (remove-whitespace-nodes sxml))))
+  (sxmlrpc->scm (remove-whitespace-nodes sxml)))
+
+(define (xmlrpc-string->scm str)
+  (xmlrpc->scm (with-input-from-string str xml->sxml)))
 
 ;;; (xmlrpc simple) ends here
