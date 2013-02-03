@@ -45,7 +45,8 @@
 
 (define-syntax sxmlrpc
   (lambda (x)
-    (syntax-case x (unquote array struct)
+    (syntax-case x (unquote base64 array struct
+                            request request* response response-fault)
       ((_ val)
        (self-evaluating? (syntax->datum #'val))
        #'(sxmlrpc ,'val))
@@ -66,12 +67,12 @@
       ((_ (request name))
        #'`(methodCall (methodName name)))
 
-      ((_ (request* name (p ...)))
+      ((_ (request* name p ...))
        #'`(methodCall (methodName name)
                       (params (param (value ,(sxmlrpc p))) ...)))
 
       ((_ (response val))
-       #'`(methodResponse (params (param ,(sxmlrpc val)))))
+       #'`(methodResponse (params (param (value ,(sxmlrpc val))))))
 
       ((_ (response-fault c m))
        (and (integer? (syntax->datum #'c))
