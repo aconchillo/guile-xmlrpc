@@ -42,12 +42,12 @@
    ((string? scm) `(string ,scm))
    ((date? scm) `(dateTime.iso8601
                   ,(date->string scm "~Y~m~dT~H:~M:~S")))
-   (else (throw 'xmlrpc-invalid))))
+   (else scm)))
 
 (define-syntax sxmlrpc
   (lambda (x)
     (syntax-case x (unquote base64 array struct
-                            request request* response response-fault)
+                            request response response-fault)
       ((_ val)
        (self-evaluating? (syntax->datum #'val))
        #'(sxmlrpc ,'val))
@@ -63,13 +63,15 @@
        #'`(array (data (value ,(sxmlrpc val)) ...)))
 
       ((_ (struct (k v) ...))
-       (every (compose string? syntax->datum) #'(k ...))
+       (every (compose symbol? syntax->datum) #'(k ...))
        #'`(struct (member (name k) (value ,(sxmlrpc v))) ...))
 
       ((_ (request name))
+       (symbol? (syntax->datum #'name))
        #'`(methodCall (methodName name)))
 
-      ((_ (request* name p ...))
+      ((_ (request name p ...))
+       (symbol? (syntax->datum #'name))
        #'`(methodCall (methodName name)
                       (params (param (value ,(sxmlrpc p))) ...)))
 
@@ -80,7 +82,12 @@
        (and (integer? (syntax->datum #'c))
             (string? (syntax->datum #'m)))
        #'`(methodResponse
-           (fault (value ,(sxmlrpc (struct ("faultCode" c)
-                                           ("faultString" m))))))))))
+           (fault (value ,(sxmlrpc (struct (faultCode c)
+                                           (faultString m)))))))
+
+      ((_ (response-fault (unquote c) (unquote m)))
+       #'`(methodResponse
+           (fault (value ,(sxmlrpc (struct (faultCode ,c)
+                                           (faultString ,m))))))))))
 
 ;;; (xmlrpc simple) ends here
