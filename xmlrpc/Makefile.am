@@ -1,4 +1,4 @@
-moddir=$(prefix)/share/guile/site
+moddir=$(prefix)/share/guile/site/xmlrpc
 
 SOURCES = base64.scm simple.scm syntax.scm
 
