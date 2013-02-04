@@ -30,6 +30,7 @@
 (define-module (xmlrpc syntax)
   #:use-module (xmlrpc base64)
   #:use-module (rnrs bytevectors)
+  #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-19)
   #:export (sxmlrpc))
 
@@ -62,6 +63,7 @@
        #'`(array (data (value ,(sxmlrpc val)) ...)))
 
       ((_ (struct (k v) ...))
+       (every (compose string? syntax->datum) #'(k ...))
        #'`(struct (member (name k) (value ,(sxmlrpc v))) ...))
 
       ((_ (request name))
