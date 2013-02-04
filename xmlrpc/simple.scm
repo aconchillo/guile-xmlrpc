@@ -58,7 +58,9 @@
   (let ((table (make-hash-table)))
     (map
      (lambda (n v)
-       (hash-set! table (second n) (sxmlrpc->scm (second v))))
+       (hash-set! table
+                  (string->symbol (second n))
+                  (sxmlrpc->scm (second v))))
      ((sxpath '(// member name)) sxml)
      ((sxpath '(// member value)) sxml))
     table))
@@ -119,20 +121,26 @@
 (define (sxmlrpc->scm sxml)
   (let-values (((type value) (car+cdr sxml)))
     (case type
-      ((i4 int double) (if (null? value) 0 (car value)))
+      ((i4 int double) (if (null? value) 0 (string->number (car value))))
       ((string) (if (null? value) "" (car value)))
       ((base64) (if (null? value) "" (utf8->string
                                       (base64-decode (car value)))))
-      ((boolean) (if (null? value) #f (not (zero? (car value)))))
+      ((boolean) (if (null? value)
+                     #f
+                     (not (zero? (string->number (car value))))))
       ((dateTime.iso8601) (if (null? value)
                               (current-date)
                               (string->date (car value)
                                             "~Y~m~dT~H:~M:~S")))
       ((array) (sxmlrpc-array->scm sxml))
       ((struct) (sxmlrpc-struct->scm sxml))
-      ((methodCall) (sxmlrpc-request->scm sxml))
-      ((methodResponse) (sxmlrpc-response->scm sxml))
-      (else (throw 'xmlrpc-invalid)))))
+      (else
+       (let ((request ((sxpath '(// methodCall)) sxml))
+             (response ((sxpath '(// methodResponse)) sxml)))
+         (cond
+          ((not (null? request)) (sxmlrpc-request->scm request))
+          ((not (null? response)) (sxmlrpc-response->scm response))
+          (else (throw 'xmlrpc-invalid))))))))
 
 (define (xmlrpc->scm sxml)
   (define (remove-whitespace-nodes sxml)
