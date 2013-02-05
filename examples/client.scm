@@ -1,3 +1,6 @@
+#!/usr/bin/guile -s
+!#
+
 ;;; Guile XMLRPC client example.
 
 ;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo at gmail dot com>
@@ -82,3 +85,5 @@
 (define params (xmlrpc-response-params response))
 
 (simple-format #t "\nThe server said: ~S\n\n" (car params))
+
+;;; code ends here

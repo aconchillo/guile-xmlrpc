@@ -1,3 +1,6 @@
+#!/usr/bin/guile -s
+!#
+
 ;;; Guile XMLRPC server example.
 
 ;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo at gmail dot com>
@@ -81,4 +84,4 @@
 ;; is received.
 (run-server main-handler)
 
-;;; ends here
+;;; code ends here
