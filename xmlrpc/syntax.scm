@@ -83,12 +83,12 @@
        (and (integer? (syntax->datum #'c))
             (string? (syntax->datum #'m)))
        #'`(methodResponse
-           (fault (value ,(sxmlrpc (struct (faultCode c)
-                                           (faultString m)))))))
+           (fault (value ,(sxmlrpc (struct ('faultCode c)
+                                           ('faultString m)))))))
 
       ((_ (response-fault (unquote c) (unquote m)))
        #'`(methodResponse
-           (fault (value ,(sxmlrpc (struct (faultCode ,c)
-                                           (faultString ,m))))))))))
+           (fault (value ,(sxmlrpc (struct ('faultCode ,c)
+                                           ('faultString ,m))))))))))
 
 ;;; (xmlrpc simple) ends here
