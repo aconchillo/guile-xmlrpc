@@ -62,17 +62,18 @@
       ((_ (array val ...))
        #'`(array (data (value ,(sxmlrpc val)) ...)))
 
-      ((_ (struct (k v) ...))
+      ((_ (struct ((quote k) v) ...))
        (every (compose symbol? syntax->datum) #'(k ...))
-       #'`(struct (member (name k) (value ,(sxmlrpc v))) ...))
+       #'`(struct (member (name ,(symbol->string 'k))
+                          (value ,(sxmlrpc v))) ...))
 
-      ((_ (request name))
+      ((_ (request (quote name)))
        (symbol? (syntax->datum #'name))
-       #'`(methodCall (methodName name)))
+       #'`(methodCall (methodName ,(symbol->string 'name))))
 
-      ((_ (request name p ...))
+      ((_ (request (quote name) p ...))
        (symbol? (syntax->datum #'name))
-       #'`(methodCall (methodName name)
+       #'`(methodCall (methodName ,(symbol->string 'name))
                       (params (param (value ,(sxmlrpc p))) ...)))
 
       ((_ (response val))
