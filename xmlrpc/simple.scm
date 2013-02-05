@@ -35,9 +35,9 @@
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-11)
   #:use-module (srfi srfi-19)
-  #:export (xmlrpc->scm
+  #:export (sxmlrpc->scm
+            xmlrpc->scm
             xmlrpc-string->scm
-            sxmlrpc->scm
             xmlrpc-request-method
             xmlrpc-request-params
             xmlrpc-response-params
@@ -51,7 +51,7 @@
 
 (define (sxmlrpc-array->scm sxml)
   (map
-   (lambda (v) (sxmlrpc->scm (second v)))
+   (lambda (v) (sxmlrpc-all->scm (second v)))
    ((sxpath '(// data value)) sxml)))
 
 (define (sxmlrpc-struct->scm sxml)
@@ -60,7 +60,7 @@
      (lambda (n v)
        (hash-set! table
                   (string->symbol (second n))
-                  (sxmlrpc->scm (second v))))
+                  (sxmlrpc-all->scm (second v))))
      ((sxpath '(// member name)) sxml)
      ((sxpath '(// member value)) sxml))
     table))
@@ -70,7 +70,7 @@
         (params ((sxpath '(// params param value)) sxml)))
     (list (cons 'method (string->symbol method))
           (cons 'params
-                (map (lambda (v) (sxmlrpc->scm (second v)))
+                (map (lambda (v) (sxmlrpc-all->scm (second v)))
                      params)))))
 
 (define (sxmlrpc-response->scm sxml)
@@ -79,7 +79,7 @@
     (cond
      ((not (null? params))
       (list (cons 'params
-                  (map (lambda (v) (sxmlrpc->scm (second v)))
+                  (map (lambda (v) (sxmlrpc-all->scm (second v)))
                        params))))
      ((not (null? fault))
       (let ((faultCode (cadar ((sxpath '(name)) (car fault))))
@@ -90,11 +90,35 @@
           (let ((code (cadar ((sxpath '(value)) (car fault))))
                 (message (cadar ((sxpath '(value)) (cdr fault)))))
             (list (cons 'fault
-                        (list (cons 'code (sxmlrpc->scm code))
-                              (cons 'message (sxmlrpc->scm message)))))))
+                        (list (cons 'code (sxmlrpc-all->scm code))
+                              (cons 'message (sxmlrpc-all->scm message)))))))
          (else (throw 'xmlrpc-invalid)))))
      ;; If we don't have params or fault, we hit some error.
      (else (throw 'xmlrpc-invalid)))))
+
+(define (sxmlrpc-all->scm sxml)
+  (let-values (((type value) (car+cdr sxml)))
+    (case type
+      ((i4 int double) (if (null? value) 0 (string->number (car value))))
+      ((string) (if (null? value) "" (car value)))
+      ((base64) (if (null? value) "" (utf8->string
+                                      (base64-decode (car value)))))
+      ((boolean) (if (null? value)
+                     #f
+                     (not (zero? (string->number (car value))))))
+      ((dateTime.iso8601) (if (null? value)
+                              (current-date)
+                              (string->date (car value)
+                                            "~Y~m~dT~H:~M:~S")))
+      ((array) (sxmlrpc-array->scm sxml))
+      ((struct) (sxmlrpc-struct->scm sxml))
+      (else
+       (let ((request ((sxpath '(// methodCall)) sxml))
+             (response ((sxpath '(// methodResponse)) sxml)))
+         (cond
+          ((not (null? request)) (sxmlrpc-request->scm request))
+          ((not (null? response)) (sxmlrpc-response->scm response))
+          (else (throw 'xmlrpc-invalid))))))))
 
 ;;
 ;; Public procedures
@@ -119,30 +143,6 @@
   (assq-ref (assq-ref response 'fault) 'message))
 
 (define (sxmlrpc->scm sxml)
-  (let-values (((type value) (car+cdr sxml)))
-    (case type
-      ((i4 int double) (if (null? value) 0 (string->number (car value))))
-      ((string) (if (null? value) "" (car value)))
-      ((base64) (if (null? value) "" (utf8->string
-                                      (base64-decode (car value)))))
-      ((boolean) (if (null? value)
-                     #f
-                     (not (zero? (string->number (car value))))))
-      ((dateTime.iso8601) (if (null? value)
-                              (current-date)
-                              (string->date (car value)
-                                            "~Y~m~dT~H:~M:~S")))
-      ((array) (sxmlrpc-array->scm sxml))
-      ((struct) (sxmlrpc-struct->scm sxml))
-      (else
-       (let ((request ((sxpath '(// methodCall)) sxml))
-             (response ((sxpath '(// methodResponse)) sxml)))
-         (cond
-          ((not (null? request)) (sxmlrpc-request->scm request))
-          ((not (null? response)) (sxmlrpc-response->scm response))
-          (else (throw 'xmlrpc-invalid))))))))
-
-(define (xmlrpc->scm sxml)
   (define (remove-whitespace-nodes sxml)
     (define (node-fix node)
       (cond ((symbol? node) node)
@@ -151,9 +151,12 @@
                                 node))
             (else (remove-whitespace-nodes node))))
     (delete #nil (map node-fix sxml)))
-  (sxmlrpc->scm (remove-whitespace-nodes sxml)))
+  (sxmlrpc-all->scm (remove-whitespace-nodes sxml)))
+
+(define (xmlrpc->scm port)
+  (sxmlrpc->scm (xml->sxml port)))
 
 (define (xmlrpc-string->scm str)
-  (xmlrpc->scm (with-input-from-string str xml->sxml)))
+  (call-with-input-string str (lambda (p) (xmlrpc->scm p))))
 
 ;;; (xmlrpc simple) ends here
