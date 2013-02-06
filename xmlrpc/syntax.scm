@@ -32,7 +32,7 @@
 ;; an integer or double, as it us automatically detected from the native
 ;; type and the proper XMLRPC element is used.
 ;;
-;; The allowed patters inside the @code{sxmlrpc} macro are
+;; The allowed patterns inside the @code{sxmlrpc} macro are
 ;; @code{base64}, @code{array}, @code{struct}, @code{request},
 ;; @code{response} and @code{response-fault}.
 ;;

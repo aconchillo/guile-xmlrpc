@@ -1,3 +1,139 @@
+
 * guile-xmlrpc
 
-XMLRPC module for Guile.
+guile-xmlrpc is an XMLRPC module for Guile. Guile already has the
+wonderful /sxml/q module that allows XML document creation and
+parsing. guile-xmlrpc goes one step further and combines /sxml/ with
+some macros and procedures that simplifies even more the creation and
+parsing of XMLRPC documents.
+
+
+* Installation
+
+guile-xmlrpc is freely available for download under the terms of the GNU
+General Public License version 3 (GPLv3).
+
+Download the latest tarball and untar it:
+
+- [[http://hacks-galore.org/aleix/guile-xmlrpc/guile-xmlrpc-0.1.0.tar.gz][guile-xmlrpc-0.1.0.tar.gz]]
+
+Then, run the typical sequence:
+
+    : $ ./configure --prefix=<guile-prefix>
+    : $ make
+    : $ sudo make install
+
+Where <guile-prefix> should preferably be the same as your system Guile
+installation directory (e.g. /usr).
+
+If everything installed successfully you should be up and running:
+
+    : $ guile
+    : scheme@(guile-user)> (use-modules (xmlrpc))
+    : scheme@(guile-user)> (sxmlrpc (array 1 2 3))
+    : (array (data (value (int 1)) (value (int 2)) (value (int 3))))
+
+It might be that you installed guile-xmlrpc somewhere differently than
+your system's Guile. If so, you need to indicate Guile where to find
+guile-xmlrpc, for example:
+
+    : $ GUILE_LOAD_PATH=/usr/local/share/guile/site guile
+
+
+* Usage
+
+guile-xmlrpc provides a few procedures to parse and build XMLRPC
+documents. An XMLRPC document is transformed into native Guile values
+(see /sxmlrpc->scm/ and derivates) according to the following table:
+
+| XMLRPC                | Guile                         |
+|-----------------------+-------------------------------|
+| <i4>, <int>, <double> | number                        |
+| <boolean>             | boolean                       |
+| <string>              | string                        |
+| <dateTime.iso8601>    | date                          |
+| <base64>              | string (already decoded)      |
+| <array>               | list                          |
+| <struct>              | hash table (keys are strings) |
+
+To start using guile-xmlrpc procedures and macros you first need to load
+the module:
+
+    : scheme@(guile-user)> (use-modules (xmlrpc))
+
+
+** Procedures
+
+- (*xmlrpc-request-method* request) Gets the method symbol from the
+  given XMLRPC native request.
+
+- (*xmlrpc-request-params* request) Gets the parameters from the given
+  XMLRPC native request. The parameters will be of one of the XMLRPC
+  native types.
+
+- (*xmlrpc-response-params* response) Gets the parameters from the given
+  XMLRPC native response. The parameters will be of one of the XMLRPC
+  native types.
+
+- (*xmlrpc-response-fault?* response) Tells whether the given XMLRPC
+  native response is a fault response.
+
+- (*xmlrpc-response-fault-code* response) Gets the fault error code from
+  the given XMLRPC native response.
+
+- (*xmlrpc-response-fault-message* response) Gets the fault error
+  message from the given XMLRPC native response.
+
+- (*sxmlrpc->scm* sxml) Reads an XMLRPC document from its SXML
+  representation from sxml and converts it to native types.
+
+- (*xmlrpc->scm* port) Reads an XMLRPC document from the given port and
+  converts it to native types.
+
+- (*xmlrpc-string->scm* str) Reads an XMLRPC document from the string
+  str and converts it to native types.
+
+
+** Macros
+
+The macro /sxmlrpc/ allows easier construction of XMLRPC documents. It
+does so by avoiding to specify most of the XMLRPC elements. For example,
+it is not necessary to specify that a value is an integer or double, as
+it us automatically detected from the native type and the proper XMLRPC
+element is used.
+
+The allowed patterns inside the /sxmlrpc/ macro are /base64/, /array/,
+/struct/, /request/, /response/ and /response-fault/.
+
+Below is the correspondence between the /sxmlrpc/ pattern and the
+generated XMLRPC elements:
+
+- (*sxmlrpc* value): where /value/ can be a native type (number,
+  boolean, string or date) or one of the other allowed macros.
+
+- (*base64* str): <base64> where /str/ will be encoded.
+
+- (*array* val ...): <array> where /val .../ is the list of array
+  values.
+
+- (*struct* ('k v) ...): <struct> where /('k v) .../ is a list of pairs
+  /k/ and /v/, where /k/ is a symbol (needs to be quoted) and /v/ is the
+  associated value (can use /sxmlrpc/ macros).
+
+- (*request* 'name): <methodCall> where /name/ is a symbol of to the
+  method (needs to be quoted).
+
+- (*request* 'name p): <methodCall> where /name/ is a symbol of to the
+  method (needs to be quoted) and /p .../ is the list of parameters (can
+  use /sxmlrpc/ macros).
+
+- (*response* p): <methodResponse> where /p/ is the single return value
+  (can use /sxmlrpc/ macros).
+
+- (*response-fault* code message): <methodResponse> response fault where
+  /code/ is an integer with the error code and /message/ is the error
+  message string.
+
+- (*response-fault* ,code ,message)/: <methodResponse> response fault
+  where /,code/ is an error code variable and /,message/ is an error
+  message variable.

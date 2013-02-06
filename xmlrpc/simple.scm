@@ -160,7 +160,7 @@ and converts it to native types.
 This is the correspondence between XMLRPC types and Guile native types:
 
 - <i4>, <int>, <double>: number
--             <boolean>: boolean (#t or #f)
+-             <boolean>: boolean
 -              <string>: string
 -    <dateTime.iso8601>: date
 -              <base64>: string (already decoded)
