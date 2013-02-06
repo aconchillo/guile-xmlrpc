@@ -2,7 +2,7 @@
 * guile-xmlrpc
 
 guile-xmlrpc is an XMLRPC module for Guile. Guile already has the
-wonderful /sxml/q module that allows XML document creation and
+wonderful /sxml/ module that allows XML document creation and
 parsing. guile-xmlrpc goes one step further and combines /sxml/ with
 some macros and procedures that simplifies even more the creation and
 parsing of XMLRPC documents.
