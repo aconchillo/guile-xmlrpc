@@ -38,6 +38,9 @@
              (web response)
              (web uri))
 
+(display "\nguile-xmlrpc server example\n")
+(display "===========================\n")
+
 ;; Here we parse the incoming request and we build the response. We are
 ;; expecting a request for the method "identify" that has one parameter.
 ;;
@@ -79,6 +82,8 @@
       (hello-xmlrpc-handler body)
       ;; Resource not found (404)
       (not-found request)))
+
+(display "\nThe server is running on http://localhost:8080\n")
 
 ;; We start the server. (main-handler) is be called every time a request
 ;; is received.

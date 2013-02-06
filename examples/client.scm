@@ -39,6 +39,9 @@
              (web response)
              (web uri))
 
+(display "\nguile-xmlrpc client example\n")
+(display "===========================\n")
+
 ;; URI we want to connect to
 (define uri (string->uri "http://localhost:8080/xmlrpc"))
 
