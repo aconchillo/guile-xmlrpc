@@ -125,24 +125,48 @@
 ;;
 
 (define (xmlrpc-request-method request)
+  "Gets the method symbol from the given XMLRPC native @var{request}."
   (assq-ref request 'method))
 
 (define (xmlrpc-request-params request)
+  "Gets the parameters from the given XMLRPC native @var{request}. The
+parameters will be of one of the XMLRPC native types."
   (assq-ref request 'params))
 
 (define (xmlrpc-response-params response)
+  "Gets the parameters from the given XMLRPC native @var{response}. The
+parameters will be of one of the XMLRPC native types."
   (assq-ref response 'params))
 
 (define (xmlrpc-response-fault? response)
+  "Tells whether the given XMLRPC native @var{response} is a fault
+response."
   (if (assq-ref response 'fault) #t #f))
 
 (define (xmlrpc-response-fault-code response)
+  "Gets the fault error code from the given XMLRPC native
+@var{response}."
   (assq-ref (assq-ref response 'fault) 'code))
 
 (define (xmlrpc-response-fault-message response)
+  "Gets the fault error message from the given XMLRPC native
+@var{response}."
   (assq-ref (assq-ref response 'fault) 'message))
 
 (define (sxmlrpc->scm sxml)
+  "Reads an XMLRPC document from its SXML representation from @var{sxml}
+and converts it to native types.
+
+This is the correspondence between XMLRPC types and Guile native types:
+
+- <i4>, <int>, <double>: number
+-             <boolean>: boolean (#t or #f)
+-              <string>: string
+-    <dateTime.iso8601>: date
+-              <base64>: string (already decoded)
+-               <array>: list
+-              <struct>: hash table (keys are strings)
+"
   (define (remove-whitespace-nodes sxml)
     (define (node-fix node)
       (cond ((symbol? node) node)
@@ -154,9 +178,13 @@
   (sxmlrpc-all->scm (remove-whitespace-nodes sxml)))
 
 (define (xmlrpc->scm port)
+  "Reads an XMLRPC document from the given @var{port} and converts it to
+native types."
   (sxmlrpc->scm (xml->sxml port)))
 
 (define (xmlrpc-string->scm str)
+  "Reads an XMLRPC document from the string @var{str} and converts it to
+native types."
   (call-with-input-string str (lambda (p) (xmlrpc->scm p))))
 
 ;;; (xmlrpc simple) ends here

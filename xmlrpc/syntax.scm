@@ -25,6 +25,52 @@
 
 ;; XMLRPC module for Guile
 
+;;
+;; The macro @code{sxmlrpc} allows easier construction of XMLRPC
+;; documents. It does so by avoiding to specify most of the XMLRPC
+;; elements. For example, it is not necessary to specify that a value is
+;; an integer or double, as it us automatically detected from the native
+;; type and the proper XMLRPC element is used.
+;;
+;; The allowed patters inside the @code{sxmlrpc} macro are
+;; @code{base64}, @code{array}, @code{struct}, @code{request},
+;; @code{response} and @code{response-fault}.
+;;
+;; Below is the correspondence between the @code{sxmlrpc} pattern and
+;; the generated XMLRPC elements:
+;;
+;; - @code{(sxmlrpc value)}: where @var{value} can be a native type
+;; (number, boolean, string or date) or one of the other allowed macros.
+;;
+;; - @code{(base64 str)}: <base64> where @var{str} will be encoded.
+;;
+;; - @code{(array val ...)}: <array> where @var{val ...} is the list of
+;; array values.
+;;
+;; - @code{(struct ('k v) ...)}: <struct> where @var{('k v) ...} is a
+;; list of pairs @var{k} and @var{v}, where @var{k} is a symbol (needs
+;; to be quoted) and @var{v} is the associated value (can use
+;; @code{sxmlrpc} macros).
+;;
+;; - @code{(request 'name)}: <methodCall> where @var{name} is a symbol
+;; of to the method (needs to be quoted).
+;;
+;; - @code{(request 'name p)}: <methodCall> where @var{name} is a symbol
+;; of to the method (needs to be quoted) and @var{p ...} is the list of
+;; parameters (can use @code{sxmlrpc} macros).
+;;
+;; - @code{(response p)}: <methodResponse> where @var{p} is the single
+;; return value (can use @code{sxmlrpc} macros).
+;;
+;; - @code{(response-fault code message)}: <methodResponse> response
+;; fault where @var{code} is an integer with the error code and
+;; @var{message} is the error message string.
+;;
+;; - @code{(response-fault ,code ,message)}: <methodResponse> response
+;; fault where @var{,code} is an error code variable and @var{,message}
+;; is an error message variable.
+;;
+
 ;;; Code:
 
 (define-module (xmlrpc syntax)
