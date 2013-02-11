@@ -1,7 +1,13 @@
 
+* Version 0.1.2 (Feb 10, 2013)
+
+  - Automatically update pkg-list.scm version.
+
+
 * Version 0.1.1 (Feb 6, 2013)
 
   - Added guildhall package file.
+
 
 * Version 0.1.0 (Feb 5, 2013)
 
