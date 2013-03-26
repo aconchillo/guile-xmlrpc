@@ -15,7 +15,7 @@ General Public License version 3 (GPLv3).
 
 Download the latest tarball and untar it:
 
-- [[http://hacks-galore.org/aleix/guile-xmlrpc/guile-xmlrpc-0.1.2.tar.gz][guile-xmlrpc-0.1.2.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-xmlrpc/guile-xmlrpc-0.1.2.tar.gz][guile-xmlrpc-0.1.2.tar.gz]]
 
 Then, run the typical sequence:
 
