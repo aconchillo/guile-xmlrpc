@@ -41,6 +41,8 @@ GOBJECTS = $(SOURCES:%.scm=%.go)
 nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES) $(GOBJECTS)
 EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
 
+EXTRA_DIST += COPYING.LESSER
+
 CLEANFILES = $(GOBJECTS)
 
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
