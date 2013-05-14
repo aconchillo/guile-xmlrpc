@@ -11,11 +11,11 @@ parsing of XMLRPC documents.
 * Installation
 
 guile-xmlrpc is freely available for download under the terms of the GNU
-General Public License version 3 (GPLv3).
+Lesser General Public License version 3 (LGPLv3).
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-xmlrpc/guile-xmlrpc-0.1.2.tar.gz][guile-xmlrpc-0.1.2.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-xmlrpc/guile-xmlrpc-0.2.0.tar.gz][guile-xmlrpc-0.2.0.tar.gz]]
 
 Then, run the typical sequence:
 

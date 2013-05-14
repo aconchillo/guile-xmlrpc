@@ -1,4 +1,9 @@
 
+* Version 0.2.0 (May 14, 2013)
+
+  - Re-licensed under LGPLv3.
+
+
 * Version 0.1.2 (Feb 10, 2013)
 
   - Automatically update pkg-list.scm version.
