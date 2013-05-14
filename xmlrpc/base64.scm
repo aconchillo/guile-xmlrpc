@@ -1,24 +1,25 @@
-;;; (xmlrpc) --- Guile XMLRPC implementation.
+;;; (xmlrpc base64) --- Guile XMLRPC implementation.
 
 ;; Copyright (C) 2008, 2010, 2012 Andy Wingo <wingo at pobox dot com>
 ;; Copyright (C) 2009 Andreas Rottmann <a dot rottmann at gmx dot at>
-
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 3 of
-;; the License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful,
+;; This file is part of guile-xmlrpc. Re-licensed under LGPLv3
+;; (originally released under GPLv3) with permission from the authors.
+;;
+;; guile-xmlrpc is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU Lesser General Public
+;; License as published by the Free Software Foundation; either
+;; version 3 of the License, or (at your option) any later version.
+;;
+;; guile-xmlrpc is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; Lesser General Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with this program; if not, contact:
-;;
-;; Free Software Foundation           Voice:  +1-617-542-5942
-;; 59 Temple Place - Suite 330        Fax:    +1-617-542-2652
-;; Boston, MA  02111-1307,  USA       gnu@gnu.org
+;; You should have received a copy of the GNU Lesser General Public
+;; License along with guile-xmlrpc; if not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+;; 02110-1301 USA
 
 ;;; Commentary:
 ;;
