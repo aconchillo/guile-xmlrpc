@@ -29,7 +29,9 @@ AM_SILENT_RULES([yes])
 
 GUILE_PROGS
 
-AC_CONFIG_FILES([Makefile xmlrpc/Makefile])
+AC_CONFIG_FILES([Makefile
+                 xmlrpc/Makefile
+                 examples/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 
 AC_OUTPUT
