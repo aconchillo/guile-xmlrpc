@@ -67,33 +67,33 @@ the module:
 
 ** Procedures
 
-- (*xmlrpc-request-method* request) Gets the method symbol from the
+- (*xmlrpc-request-method* request) : Gets the method symbol from the
   given XMLRPC native request.
 
-- (*xmlrpc-request-params* request) Gets the parameters from the given
+- (*xmlrpc-request-params* request) : Gets the parameters from the given
   XMLRPC native request. The parameters will be of one of the XMLRPC
   native types.
 
-- (*xmlrpc-response-params* response) Gets the parameters from the given
-  XMLRPC native response. The parameters will be of one of the XMLRPC
-  native types.
+- (*xmlrpc-response-params* response) : Gets the parameters from the
+  given XMLRPC native response. The parameters will be of one of the
+  XMLRPC native types.
 
-- (*xmlrpc-response-fault?* response) Tells whether the given XMLRPC
+- (*xmlrpc-response-fault?* response) : Tells whether the given XMLRPC
   native response is a fault response.
 
-- (*xmlrpc-response-fault-code* response) Gets the fault error code from
-  the given XMLRPC native response.
+- (*xmlrpc-response-fault-code* response) : Gets the fault error code
+  from the given XMLRPC native response.
 
-- (*xmlrpc-response-fault-message* response) Gets the fault error
+- (*xmlrpc-response-fault-message* response) : Gets the fault error
   message from the given XMLRPC native response.
 
-- (*sxmlrpc->scm* sxml) Reads an XMLRPC document from its SXML
+- (*sxmlrpc->scm* sxml) : Reads an XMLRPC document from its SXML
   representation from sxml and converts it to native types.
 
-- (*xmlrpc->scm* port) Reads an XMLRPC document from the given port and
-  converts it to native types.
+- (*xmlrpc->scm* port) : Reads an XMLRPC document from the given port
+  and converts it to native types.
 
-- (*xmlrpc-string->scm* str) Reads an XMLRPC document from the string
+- (*xmlrpc-string->scm* str) : Reads an XMLRPC document from the string
   str and converts it to native types.
 
 
