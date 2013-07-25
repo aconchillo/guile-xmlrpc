@@ -11,7 +11,7 @@ parsing of XMLRPC documents.
 * Installation
 
 guile-xmlrpc is freely available for download under the terms of the GNU
-Lesser General Public License version 3 (LGPLv3).
+Lesser General Public License version 3 (LGPLv3+).
 
 Download the latest tarball and untar it:
 
