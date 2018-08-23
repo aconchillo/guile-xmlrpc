@@ -1,7 +1,7 @@
 #
 # Makefile.am
 #
-# Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo@gmail.com>
+# Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
 #
 # This file is part of guile-xmlrpc.
 #
@@ -30,9 +30,11 @@ PKG_LIST_VERSION=$(shell echo $(PACKAGE_VERSION) | sed "s/\./ /g")
 dist-hook:
 	$(SHELL) $(top_srcdir)/ChangeLog > $(top_distdir)/ChangeLog
 	cp $(top_srcdir)/pkg-list.scm.in $(top_distdir)/pkg-list.scm
-	sed -i "s/%VERSION%/$(PKG_LIST_VERSION)/" $(top_distdir)/pkg-list.scm
+        # '' is to make OS X happy
+	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
-moddir=$(prefix)/share/guile/site
+moddir = $(datadir)/guile/site/@GUILE_EFFECTIVE_VERSION@
+objdir = $(libdir)/guile/@GUILE_EFFECTIVE_VERSION@/site-ccache
 
 SOURCES = xmlrpc.scm
 
