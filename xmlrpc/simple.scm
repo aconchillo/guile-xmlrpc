@@ -1,6 +1,6 @@
 ;;; (xmlrpc simple) --- Guile XMLRPC implementation.
 
-;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-xmlrpc.
 ;;
@@ -26,7 +26,7 @@
 ;;; Code:
 
 (define-module (xmlrpc simple)
-  #:use-module (xmlrpc base64)
+  #:use-module (xmlrpc industria base64)
   #:use-module (rnrs bytevectors)
   #:use-module (sxml simple)
   #:use-module (sxml xpath)

@@ -41,6 +41,7 @@ GUILE_MODULE_REQUIRED([gnutls])
 
 AC_CONFIG_FILES([Makefile
                  xmlrpc/Makefile
+                 xmlrpc/industria/Makefile
                  examples/Makefile])
 AC_CONFIG_FILES([env], [chmod +x env])
 

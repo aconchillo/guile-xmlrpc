@@ -21,10 +21,12 @@
 # 02110-1301 USA
 #
 
+SUBDIRS = industria
+
 moddir = $(datadir)/guile/site/@GUILE_EFFECTIVE_VERSION@/xmlrpc
 objdir = $(libdir)/guile/@GUILE_EFFECTIVE_VERSION@/site-ccache/xmlrpc
 
-SOURCES = base64.scm simple.scm syntax.scm
+SOURCES = simple.scm syntax.scm
 
 GOBJECTS = $(SOURCES:%.scm=%.go)
 

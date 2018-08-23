@@ -1,6 +1,6 @@
 ;;; (xmlrpc syntax) --- Guile XMLRPC implementation.
 
-;; Copyright (C) 2013 Aleix Conchillo Flaque <aconchillo@gmail.com>
+;; Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
 ;;
 ;; This file is part of guile-xmlrpc.
 ;;
@@ -72,7 +72,7 @@
 ;;; Code:
 
 (define-module (xmlrpc syntax)
-  #:use-module (xmlrpc base64)
+  #:use-module (xmlrpc industria base64)
   #:use-module (rnrs bytevectors)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-19)
