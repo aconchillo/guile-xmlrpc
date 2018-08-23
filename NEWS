@@ -1,4 +1,13 @@
 
+* Version 0.3.0 (Aug 22, 2018)
+
+  - Switch to GPLv3.
+
+  - Updated configure and installation.
+
+  - Replace base64 with Industria's one.
+
+
 * Version 0.2.2 (Jul 6, 2013)
 
   - Use pure sh script syntax in env.in.

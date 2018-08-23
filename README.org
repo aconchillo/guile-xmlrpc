@@ -12,7 +12,7 @@ parsing of XMLRPC documents.
 
 Download the latest tarball and untar it:
 
-- [[http://download.savannah.gnu.org/releases/guile-xmlrpc/guile-xmlrpc-0.2.2.tar.gz][guile-xmlrpc-0.2.2.tar.gz]]
+- [[http://download.savannah.gnu.org/releases/guile-xmlrpc/guile-xmlrpc-0.3.0.tar.gz][guile-xmlrpc-0.3.0.tar.gz]]
 
 If you are cloning the repository make sure you run this first:
 
