@@ -1,4 +1,4 @@
-#!/usr/local/bin/guile -s
+#!/usr/bin/env guile -s
 !#
 
 ;;; Guile XMLRPC client example.
