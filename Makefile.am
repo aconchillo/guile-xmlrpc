@@ -1,7 +1,7 @@
 #
 # Makefile.am
 #
-# Copyright (C) 2013-2018 Aleix Conchillo Flaque <aconchillo@gmail.com>
+# Copyright (C) 2013-2020 Aleix Conchillo Flaque <aconchillo@gmail.com>
 #
 # This file is part of guile-xmlrpc.
 #
@@ -31,19 +31,20 @@ dist-hook:
         # '' is to make OS X happy
 	sed -i '' "s/%VERSION%/$(PKG_LIST_VERSION)/g" $(top_distdir)/pkg-list.scm
 
-moddir = $(datadir)/guile/site/@GUILE_EFFECTIVE_VERSION@
-objdir = $(libdir)/guile/@GUILE_EFFECTIVE_VERSION@/site-ccache
-
-SOURCES = xmlrpc.scm
-
 GOBJECTS = $(SOURCES:%.scm=%.go)
 
-nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES) $(GOBJECTS)
-EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
+moddir=$(datadir)/guile/site/$(GUILE_EFFECTIVE_VERSION)
+objdir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/site-ccache
 
-CLEANFILES = $(GOBJECTS)
+nobase_mod_DATA = $(SOURCES) $(NOCOMP_SOURCES) $(GOBJECTS)
 
 GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 SUFFIXES = .scm .go
 .scm.go:
-	$(top_builddir)/env $(GUILE_TOOLS) compile $(GUILE_WARNINGS) -o "$@" "$<"
+	$(top_builddir)/env $(GUILD) compile $(GUILE_TARGET) $(GUILE_WARNINGS) -o "$@" "$<"
+
+SOURCES = xmlrpc.scm
+
+CLEANFILES = $(GOBJECTS)
+
+EXTRA_DIST = $(SOURCES) $(NOCOMP_SOURCES)
